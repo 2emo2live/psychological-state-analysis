@@ -1,0 +1,5 @@
+defaults:
+  - data: default
+  - model: distilbert
+  - train: default
+  - _self_
