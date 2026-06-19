@@ -1,9 +1,9 @@
 # import hydra
 import pytorch_lightning as pl
 
-# from loggers.resolver import get_logger
 # from omegaconf import DictConfig
 from pytorch_lightning.callbacks import LearningRateMonitor, ModelCheckpoint
+from pytorch_lightning.loggers import MLFlowLogger
 from transformers import DistilBertTokenizer
 
 from psychology_state_analyzer.data_processing.datamodule import MentalHealthDataModule
@@ -44,7 +44,7 @@ def train() -> None:
         learning_rate=1e-3,
         weight_decay=1e-4,
         warmup_steps=100,
-        device="cuda",
+        device="mps",  # TODO: Change to "cuda" if using GPU, or "cpu" if using CPU
     )
 
     """callbacks = [
@@ -64,11 +64,18 @@ def train() -> None:
         LearningRateMonitor(logging_interval="epoch"),
     ]"""
 
+    mlf_logger = MLFlowLogger(
+        experiment_name="psycho_state_classification",  # имя эксперимента
+        tracking_uri="http://127.0.0.1:8080",  # адрес сервера
+        log_model=True,  # автоматически логировать модель
+    )
+
     trainer = pl.Trainer(
         max_epochs=1,
         # logger=get_logger(cfg),
         log_every_n_steps=100,
         deterministic=False,
+        logger=mlf_logger,
     )
 
     trainer.fit(
@@ -79,5 +86,4 @@ def train() -> None:
 
 
 if __name__ == "__main__":
-    print(1)
     train()

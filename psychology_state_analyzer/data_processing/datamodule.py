@@ -47,7 +47,11 @@ class MentalHealthDataModule(pl.LightningDataModule):
         )
 
     def val_dataloader(self):
-        return DataLoader(self.val_dataset, batch_size=self.hparams.batch_size)
+        return DataLoader(
+            self.val_dataset, batch_size=self.hparams.batch_size, shuffle=False
+        )
 
     def test_dataloader(self):
-        return DataLoader(self.test_dataset, batch_size=self.hparams.batch_size)
+        return DataLoader(
+            self.test_dataset, batch_size=self.hparams.batch_size, shuffle=False
+        )

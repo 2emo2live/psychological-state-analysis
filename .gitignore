@@ -230,3 +230,5 @@ data/*
 models/*
 !models/*.dvc
 Mental_Health.ipynb
+lightning_logs/
+mlruns/

@@ -1,3 +1,4 @@
+import torch
 from torch.utils.data import Dataset
 
 
@@ -13,8 +14,8 @@ class MentalHealthDataset(Dataset):
         return len(self.texts)
 
     def __getitem__(self, idx):
-        text = str(self.texts[idx])
-        label = self.labels[idx]
+        text = str(self.texts.iloc[idx])  # TODO: optimize
+        label = self.labels.iloc[idx]
 
         encoding = self.tokenizer(
             text,

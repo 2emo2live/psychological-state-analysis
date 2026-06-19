@@ -78,7 +78,7 @@ class PsychologicalStateModel(pl.LightningModule):
         return loss
 
     def validation_step(self, batch: dict, batch_idx: int) -> None:
-        loutputs = self(
+        outputs = self(
             input_ids=batch["input_ids"],
             attention_mask=batch["attention_mask"],
             labels=batch["labels"],
