@@ -4,7 +4,7 @@ from torch import nn
 from torch.optim import AdamW
 from torchmetrics import Accuracy, F1Score
 from transformers import (
-    DistilBertForSequenceClassification,
+    AutoModelForSequenceClassification,
     get_linear_schedule_with_warmup,
 )
 
@@ -22,7 +22,7 @@ class PsychologicalStateModel(pl.LightningModule):
         super().__init__()
         self.save_hyperparameters()
 
-        self.model = DistilBertForSequenceClassification.from_pretrained(
+        self.model = AutoModelForSequenceClassification.from_pretrained(
             model_name, num_labels=num_classes
         )
 
@@ -75,7 +75,7 @@ class PsychologicalStateModel(pl.LightningModule):
         loss = outputs.loss
         preds = torch.argmax(outputs.logits, dim=1)
 
-        self.log("val_loss", loss, on_epoch=True, prog_bar=True)  # TODO: explore
+        self.log("val_loss", loss, on_epoch=True, prog_bar=True)
         self.val_accuracy(preds, batch["labels"])
         self.val_f1(preds, batch["labels"])
         self.log("val_accuracy", self.val_accuracy, on_epoch=True, prog_bar=True)

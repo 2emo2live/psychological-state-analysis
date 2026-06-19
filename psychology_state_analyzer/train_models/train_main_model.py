@@ -11,11 +11,6 @@ from psychology_state_analyzer.models.main_model import PsychologicalStateModel
 
 @hydra.main(config_path="../../configs", config_name="config", version_base=None)
 def train(cfg: DictConfig) -> None:
-    """Train the segmentation model using config from Hydra.
-
-    Args:
-        cfg: Hydra config composed from conf/config.yaml and its defaults.
-    """
     pl.seed_everything(cfg.train.seed, workers=True)
 
     load_data(
@@ -30,19 +25,19 @@ def train(cfg: DictConfig) -> None:
         root_path=cfg.data.root_path,
         tokenizer_name=cfg.model.backbone,
         batch_size=cfg.data.batch_size,
-        max_len=cfg.data.max_len,  # TODO: explore
+        max_len=cfg.data.max_len,
     )
 
     model = PsychologicalStateModel(
         model_name=cfg.model.backbone,
-        num_classes=7,
+        num_classes=cfg.model.num_classes,
         num_layers_to_train=cfg.model.num_layers_to_train,
         learning_rate=cfg.train.lr,
         weight_decay=cfg.train.weight_decay,
         warmup_steps=cfg.train.warmup_steps,
     )
 
-    """callbacks = [
+    callbacks = [
         ModelCheckpoint(
             dirpath=cfg.train.checkpoint_dir,
             filename="best",
@@ -52,16 +47,15 @@ def train(cfg: DictConfig) -> None:
         ),
         ModelCheckpoint(
             dirpath=cfg.train.checkpoint_dir,
-            filename="epochs",
-            save_top_k=cfg.train.epochs,
+            filename="last",
+            save_top_k=1,
             every_n_epochs=1,
-        )
-    ]"""
+        ),
+    ]
 
     mlf_logger = MLFlowLogger(
         experiment_name=cfg.logger.experiment_name,
         tracking_uri=cfg.logger.tracking_uri,
-        log_model=True,
     )
 
     trainer = pl.Trainer(
@@ -71,7 +65,7 @@ def train(cfg: DictConfig) -> None:
         logger=mlf_logger,
         accelerator=cfg.train.accelerator,
         devices=cfg.train.devices,
-        # callbacks=callbacks,
+        callbacks=callbacks,
     )
 
     trainer.fit(

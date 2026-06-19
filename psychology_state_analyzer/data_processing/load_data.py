@@ -10,9 +10,9 @@ from sklearn.preprocessing import LabelEncoder
 def load_data(
     root_path: str,
     dvc_path: str,
-    train_size: float = 0.7,
-    val_size: float = 0.15,
-    seed: int = 19,
+    train_size: float,
+    val_size: float,
+    seed: int,
 ):
     file_content = dvc.api.read(path=dvc_path, remote="data_remote")
     df = pd.read_csv(StringIO(file_content))

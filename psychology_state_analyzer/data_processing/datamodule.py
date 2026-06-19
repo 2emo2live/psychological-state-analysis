@@ -1,7 +1,7 @@
 import pytorch_lightning as pl
 import torch
 from torch.utils.data import DataLoader
-from transformers import DistilBertTokenizer
+from transformers import AutoTokenizer
 
 from psychology_state_analyzer.data_processing.dataset import MentalHealthDataset
 
@@ -16,7 +16,7 @@ class MentalHealthDataModule(pl.LightningDataModule):
     ):
         super().__init__()
         self.save_hyperparameters()
-        self.tokenizer = DistilBertTokenizer.from_pretrained(tokenizer_name)
+        self.tokenizer = AutoTokenizer.from_pretrained(tokenizer_name)
 
     def _collate_fn(self, batch):
         texts, labels = zip(*batch)
