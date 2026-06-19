@@ -1,32 +1,31 @@
-import torch
+from pathlib import Path
+
+import pandas as pd
 from torch.utils.data import Dataset
 
 
 class MentalHealthDataset(Dataset):
-    def __init__(self, texts, labels, tokenizer, max_len):
+    def __init__(self, root_path: str, split: str):
         super().__init__()
-        self.texts = texts
-        self.labels = labels
-        self.tokenizer = tokenizer
-        self.max_len = max_len
+        file_name = split + ".csv"
+        data_root = Path(root_path) / file_name
+        self.split = split
+
+        if not data_root.exists():
+            raise FileNotFoundError(
+                f"Data file not found: {data_root}\n"
+                "Use the `load_data` function to prepare the dataset before using this class."
+            )
+
+        df = pd.read_csv(data_root)
+        self.texts = df["statement"]
+        self.labels = df["label"]
 
     def __len__(self):
         return len(self.texts)
 
     def __getitem__(self, idx):
-        text = str(self.texts.iloc[idx])  # TODO: optimize
-        label = self.labels.iloc[idx]
+        text = str(self.texts[idx])
+        label = self.labels[idx]
 
-        encoding = self.tokenizer(
-            text,
-            truncation=True,
-            padding="max_length",
-            max_length=self.max_len,  # TODO: explore
-            return_tensors="pt",
-        )
-
-        return {
-            "input_ids": encoding["input_ids"].flatten(),
-            "attention_mask": encoding["attention_mask"].flatten(),
-            "labels": torch.tensor(label, dtype=torch.long),
-        }
+        return text, label

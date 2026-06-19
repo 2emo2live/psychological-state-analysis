@@ -3,7 +3,6 @@ import pytorch_lightning as pl
 from omegaconf import DictConfig
 from pytorch_lightning.callbacks import LearningRateMonitor, ModelCheckpoint
 from pytorch_lightning.loggers import MLFlowLogger
-from transformers import DistilBertTokenizer
 
 from psychology_state_analyzer.data_processing.datamodule import MentalHealthDataModule
 from psychology_state_analyzer.data_processing.load_data import load_data
@@ -19,22 +18,19 @@ def train(cfg: DictConfig) -> None:
     """
     pl.seed_everything(cfg.train.seed, workers=True)
 
-    (X_train, y_train), (X_val, y_val), (X_test, y_test) = load_data(cfg.data.dvc_path)
-
-    tokenizer = DistilBertTokenizer.from_pretrained(cfg.model.backbone)
-
-    max_len = tokenizer.model_max_length  # TODO: explore
+    load_data(
+        root_path=cfg.data.root_path,
+        dvc_path=cfg.data.dvc_path,
+        train_size=cfg.data.train_split,
+        val_size=cfg.data.val_split,
+        seed=cfg.train.seed,
+    )
 
     datamodule = MentalHealthDataModule(
-        train_texts=X_train,
-        train_labels=y_train,
-        val_texts=X_val,
-        val_labels=y_val,
-        test_texts=X_test,
-        test_labels=y_test,
-        tokenizer=tokenizer,
+        root_path=cfg.data.root_path,
+        tokenizer_name=cfg.model.backbone,
         batch_size=cfg.data.batch_size,
-        max_len=max_len,
+        max_len=cfg.data.max_len,  # TODO: explore
     )
 
     model = PsychologicalStateModel(
