@@ -21,7 +21,7 @@ class MentalHealthDataset(Dataset):
             text,
             truncation=True,
             padding="max_length",
-            max_length=self.max_len,
+            max_length=self.max_len,  # TODO: explore
             return_tensors="pt",
         )
 

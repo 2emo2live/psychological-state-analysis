@@ -10,25 +10,14 @@ from transformers import (
 
 
 class PsychologicalStateModel(pl.LightningModule):
-    """UNet segmentation model wrapped as a LightningModule.
-
-    Args:
-        encoder: SMP encoder backbone name (e.g. ``"resnet34"``).
-        encoder_weights: Pre-trained weights for the encoder.
-        lr: Initial learning rate for AdamW.
-        weight_decay: Weight decay for AdamW.
-        epochs: Total training epochs, used for CosineAnnealingLR T_max.
-    """
-
     def __init__(
         self,
-        model_name: str = "distilbert-base-uncased",
-        num_classes: int = 7,
-        num_layers_to_train: int = 2,
-        learning_rate: float = 2e-5,
-        weight_decay: float = 0.01,
-        warmup_steps: int = 0,
-        device: str = "cpu",
+        model_name: str,
+        num_classes: int,
+        num_layers_to_train: int,
+        learning_rate: float,
+        weight_decay: float,
+        warmup_steps: int,
     ) -> None:
         super().__init__()
         self.save_hyperparameters()
@@ -36,15 +25,15 @@ class PsychologicalStateModel(pl.LightningModule):
         self.model = DistilBertForSequenceClassification.from_pretrained(
             model_name, num_labels=num_classes
         )
-        self.model = self.model.to(self.hparams.device)
 
         for name, param in self.model.distilbert.named_parameters():
-            # Замораживаем все слои
             param.requires_grad = False
 
-        # Размораживаем последние num_layers_to_train трансформерных слоев
-        # DistilBERT имеет 6 слоев
-        for i in range(6 - num_layers_to_train, 6):
+        num_layers = self.model.config.num_hidden_layers
+        assert num_layers_to_train <= num_layers, (
+            "num_layers_to_train must be less than or equal to num_layers"
+        )
+        for i in range(num_layers - num_layers_to_train, num_layers):
             layer_name = f"transformer.layer.{i}"
             for name, param in self.model.distilbert.named_parameters():
                 if layer_name in name:
@@ -86,8 +75,7 @@ class PsychologicalStateModel(pl.LightningModule):
         loss = outputs.loss
         preds = torch.argmax(outputs.logits, dim=1)
 
-        # Логируем loss и метрики
-        self.log("val_loss", loss, on_epoch=True, prog_bar=True)
+        self.log("val_loss", loss, on_epoch=True, prog_bar=True)  # TODO: explore
         self.val_accuracy(preds, batch["labels"])
         self.val_f1(preds, batch["labels"])
         self.log("val_accuracy", self.val_accuracy, on_epoch=True, prog_bar=True)

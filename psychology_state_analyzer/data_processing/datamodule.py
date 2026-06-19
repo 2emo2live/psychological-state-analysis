@@ -14,8 +14,8 @@ class MentalHealthDataModule(pl.LightningDataModule):
         test_texts,
         test_labels,
         tokenizer,
-        batch_size: int = 32,
-        max_len: int = 128,
+        batch_size,
+        max_len,
     ):
         super().__init__()
         self.save_hyperparameters()

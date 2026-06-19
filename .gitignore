@@ -232,3 +232,4 @@ models/*
 Mental_Health.ipynb
 lightning_logs/
 mlruns/
+outputs/

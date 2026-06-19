@@ -1,0 +1,7 @@
+data_root: ../../data
+dvc_path: data/Data.csv
+batch_size: 32
+num_workers: 1
+train_split: 0.7
+val_split: 0.15
+test_split: 0.15
