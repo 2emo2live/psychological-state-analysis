@@ -221,3 +221,12 @@ __marimo__/
 
 # Mac
 .DS_Store
+
+# Project
+*.pth
+*.ckpt
+data/*
+!data/*.dvc
+models/*
+!models/*.dvc
+Mental_Health.ipynb
