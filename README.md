@@ -12,9 +12,8 @@
 8. [DVC: данные и модельные артефакты](#8-dvc-данные-и-модельные-артефакты)
 9. [MLflow](#9-mlflow)
 10. [Train](#10-train)
-11. [Evaluation](#11-evaluation)
-12. [Production preparation](#12-production-preparation)
-13. [Infer](#13-infer)
+11. [Production preparation](#11-production-preparation)
+12. [Infer](#12-infer)
 
 ---
 
@@ -67,24 +66,7 @@
 Максимальная длина текста после токенизации для DistilBERT — **512 токенов**, в проекте используется порог обрезки`max_len = 512` (покрывает >95% сообщений).
 Для бейзлайна текст предобрабатывается (стемминг, удаление пунктуации и ссылок). Для основной модели текст не изменяется (сохраняется пунктуация и регистр, т.к. DistilBERT использует токенизатор с субсловными единицами).
 
-### 2.3. Выходные данные инференса
-
-Система возвращает структурированный ответ:
-
-```json
-{
-  "predicted_class": "Anxiety",
-  "predicted_class_index": 3,
-  "confidence": 0.8234,
-  "top_k": [
-    {"class_index": 3, "class_name": "Anxiety", "confidence": 0.8234},
-    {"class_index": 1, "class_name": "Depression", "confidence": 0.1123},
-    ...
-  ]
-}
-```
-
-### 2.4. Практическая мотивация
+### 2.3. Практическая мотивация
 
 Сервис может использоваться как компонент для мониторинга психологического состояния пользователей в чат‑ботах и социальных сетях, помогая своевременно выявлять тревожные сигналы и снижать риски негативного воздействия ИИ.
 
@@ -228,9 +210,15 @@ psychology_state_analyzer/
 │       │       └── model.onnx
 │       └───── config.pbtxt
 └── plots/
-    ├── train_loss.png
+    ├── train_accuracy_epoch.png
+    ├── train_accuracy_step.png
+    ├── train_loss_epoch.png
+    ├── train_loss_step.png
     ├── val_loss.png
-    └── val_macro_f1.png
+    ├── val_accuracy.png
+    ├── val_precision.png
+    ├── val_recall.png
+    └── val_weighted_f1.png
 ```
 
 ---
@@ -249,7 +237,7 @@ psychology_state_analyzer/
 ### 6.2. Клонирование
 
 ```bash
-git clone https://github.com/yourusername/psychology_state_analyzer.git
+git clone https://github.com/2emo2live/psychological-state-analysis
 cd psychological_state_analysis
 ```
 
@@ -316,7 +304,7 @@ uv run pre-commit run --all-files
 
 Настройка (локальное хранилище):
 
-Хранилища расположены в Google Drive, поэтому для их использования необходимо настроить dvc-gdrive (см. гайд на фоциальном сайте: https://doc.dvc.org/user-guide/data-management/remote-storage/google-drive#using-a-custom-google-cloud-project-recommended)
+Хранилища расположены в Google Drive, поэтому для их использования необходимо настроить dvc-gdrive (см. гайд на офциальном сайте: https://doc.dvc.org/user-guide/data-management/remote-storage/google-drive#using-a-custom-google-cloud-project-recommended)
 
 ### 8.2. Получение данных
 
@@ -327,7 +315,7 @@ dvc pull -r data-remote
 ### 8.3. Добавление данных в DVC
 
 ```bash
-dvc add data/raw/Combined\ Data.csv
+dvc add data/Data.csv
 dvc push -r data-remote
 ```
 
@@ -345,10 +333,7 @@ dvc push -r models-remote
 ### 9.1. Запуск локального сервера
 
 ```bash
-uv run mlflow server \
-  --host 127.0.0.1 \
-  --port 8080 \
-  --default-artifact-root ./mlruns
+uv run mlflow server --host 127.0.0.1 --port 8080
 ```
 
 ### 9.2. Что логируется
@@ -394,32 +379,11 @@ uv run python -m psychology_state_analyzer.commands train_main
 Ожидаемые метрики:
 `val_macro_f1 ≈ 0.82–0.85`, `test_macro_f1 ≥ 0.80`.
 
-### 10.3. Ресурсы
-
-- Бейзлайн: CPU (любой), память ~2 ГБ.
-- DistilBERT: рекомендуется GPU с 8+ ГБ VRAM (например, NVIDIA T4). Обучение 3 эпох на T4 занимает ~20 минут.
-
 ---
 
-## 11. Evaluation
+## 11. Production preparation
 
-Standalone‑оценка на тестовой выборке:
-
-Пример `summary_metrics.json`:
-
-```json
-{
-  "accuracy": 0.85,
-  "macro_precision": 0.83,
-  "macro_recall": 0.82,
-  "macro_f1": 0.825,
-  "weighted_f1": 0.85
-}
-```
-
-## 12. Production preparation
-
-### 12.1. Экспорт в ONNX
+### 11.1. Экспорт в ONNX
 
 ```bash
 uv run python -m psychology_state_analyzer.commands export_onnx
@@ -427,7 +391,7 @@ uv run python -m psychology_state_analyzer.commands export_onnx
 
 Параметры: `opset_version=17`, динамический батч, динамическая длина последовательности.
 
-### 12.2. Экспорт в TensorRT
+### 11.2. Экспорт в TensorRT
 
 Требуется NVIDIA GPU и `trtexec`. Выполняется:
 
@@ -437,30 +401,7 @@ uv run python -m psychology_state_analyzer.commands export_tensorrt
 
 Создаётся движок `.plan`.
 
-### 12.3. Triton model repository
-
-Сборка репозитория:
-
-```bash
-uv run python -m psychology_state_analyzer.serving.triton_repository \
-  model=distilbert \
-  onnx_path=models/onnx/model.onnx \
-  tensorrt_path=models/tensorrt/model.plan
-```
-
-Структура:
-
-```
-deployment/triton_model_repository/
-├── mental_health_classifier_onnx/
-│   ├── 1/
-│   │   └── model.onnx
-│   └── config.pbtxt
-└── mental_health_classifier_tensorrt/
-    ├── 1/
-    │   └── model.plan
-    └── config.pbtxt
-```
+### 11.3. Triton model repository
 
 `config.pbtxt` для ONNX (CPU):
 
@@ -469,8 +410,8 @@ name: "mental_health_classifier_onnx"
 platform: "onnxruntime_onnx"
 max_batch_size: 32
 input [
-  { name: "input_ids", data_type: TYPE_INT64, dims: [128] },
-  { name: "attention_mask", data_type: TYPE_INT64, dims: [128] }
+  { name: "input_ids", data_type: TYPE_INT64, dims: [512] },
+  { name: "attention_mask", data_type: TYPE_INT64, dims: [512] }
 ]
 output [
   { name: "logits", data_type: TYPE_FP32, dims: [7] }
@@ -482,13 +423,13 @@ instance_group [ { kind: KIND_CPU } ]
 
 ---
 
-## 13. Infer
+## 12. Infer
 
-### 16.1. Запуск Triton сервера
+### 12.1. Запуск Triton сервера
 
-```bash
-TRITON_ENABLE_GPU=false TRITON_LOAD_MODEL=mental_health_classifier_onnx \
-  bash scripts/run_triton_server.sh
+```
+bash
+./triton_server/run_triton_server.sh
 ```
 
 Проверка готовности:
@@ -497,7 +438,7 @@ TRITON_ENABLE_GPU=false TRITON_LOAD_MODEL=mental_health_classifier_onnx \
 curl -s localhost:8000/v2/health/ready
 ```
 
-### 13.2. Клиентский скрипт (infer.py)
+### 12.2. Клиентский скрипт (infer.py)
 
 Пример использования:
 
@@ -505,15 +446,4 @@ curl -s localhost:8000/v2/health/ready
 uv run python infer.py --text "I feel very anxious"
 ```
 
-Ответ:
-
-```json
-{
-  "predicted_class": "Anxiety",
-  "predicted_class_index": 3,
-  "confidence": 0.87,
-  "top_k": [...]
-}
-```
-
-Клиент выполняет предобработку (токенизация через `AutoTokenizer`), отправляет запрос в Triton, применяет softmax к логитам и возвращает классы.
+Клиент выполняет предобработку (токенизация через `AutoTokenizer`), отправляет запрос в Triton, получает логиты и возвращает классы.
