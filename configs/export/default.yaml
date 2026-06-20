@@ -1,5 +1,6 @@
 checkpoint_path: checkpoints/best.ckpt
-output_path: models/model.onnx
+onnx_output_path: models/model.onnx
+tensorrt_output_path: models/model.trt
 opset_version: 17
 do_constant_folding: true
 verify: true

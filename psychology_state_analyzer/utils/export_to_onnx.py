@@ -32,14 +32,14 @@ def export_to_onnx(cfg: DictConfig):
         (cfg.data.batch_size, cfg.data.max_len), dtype=torch.long
     )
 
-    onnx_path = Path(cfg.export.output_path)
+    onnx_path = Path(cfg.export.onnx_output_path)
     onnx_path.parent.mkdir(parents=True, exist_ok=True)
 
     with torch.inference_mode():
         torch.onnx.export(
             model,
             (dummy_input_ids, dummy_attention_mask),
-            cfg.export.output_path,
+            cfg.export.onnx_output_path,
             input_names=["input_ids", "attention_mask"],
             output_names=["logits"],
             dynamic_axes={
@@ -54,12 +54,12 @@ def export_to_onnx(cfg: DictConfig):
             model(dummy_input_ids, dummy_attention_mask).detach().cpu().numpy()
         )
 
-    onnx_model = onnx.load(cfg.export.output_path)
+    onnx_model = onnx.load(cfg.export.onnx_output_path)
     onnx.checker.check_model(onnx_model)
 
     if cfg.export.verify:
         ort_session = ort.InferenceSession(
-            cfg.export.output_path,
+            cfg.export.onnx_output_path,
             providers=["CPUExecutionProvider"],
         )
         ort_inputs = {
@@ -71,7 +71,7 @@ def export_to_onnx(cfg: DictConfig):
         max_abs_diff = np.max(np.abs(torch_output - ort_output))
         print(f"Максимальная абсолютная разница: {max_abs_diff:.6f}")
 
-    print(f"ONNX модель сохранена в {cfg.export.output_path}")
+    print(f"ONNX модель сохранена в {cfg.export.onnx_output_path}")
 
 
 if __name__ == "__main__":

@@ -10,8 +10,7 @@ from psychology_state_analyzer.train_models.train_baseline import (
 )
 from psychology_state_analyzer.train_models.train_main_model import train as train_main
 from psychology_state_analyzer.utils.export_to_onnx import export_to_onnx
-
-# from psychology_state_analyzer.utils.export_to_tensorrt import export_to_tensorrt
+from psychology_state_analyzer.utils.export_to_tensorrt import export_to_tensorrt
 
 
 class Commands:
@@ -59,8 +58,7 @@ class Commands:
         Конвертация ONNX в TensorRT engine.
         """
         cfg = self._compose_config(overrides=overrides)
-        # export_to_tensorrt(cfg)
-        pass
+        export_to_tensorrt(cfg)
 
 
 if __name__ == "__main__":
