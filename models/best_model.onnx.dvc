@@ -1,0 +1,6 @@
+outs:
+- md5: da77456ef59cafdf240b03d9e68bc5ca
+  size: 265581557
+  hash: md5
+  path: best_model.onnx
+  remote: model_remote

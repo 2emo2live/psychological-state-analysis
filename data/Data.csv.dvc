@@ -3,3 +3,4 @@ outs:
   size: 31469558
   hash: md5
   path: Data.csv
+  remote: data_remote
