@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 set -e
 
-MODEL_REPO="$(pwd)/triton/model_repository"
+MODEL_REPO="$(pwd)/triton_server/model_repository"
 IMAGE="nvcr.io/nvidia/tritonserver:24.12-py3"
 
 docker run --rm --shm-size=1g \

@@ -225,6 +225,8 @@ __marimo__/
 # Project
 *.pth
 *.ckpt
+*.onnx
+*.plan
 data/*
 !data/*.dvc
 models/*

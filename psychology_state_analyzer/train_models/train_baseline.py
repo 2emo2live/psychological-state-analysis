@@ -80,7 +80,6 @@ def train(cfg: DictConfig):
             "C": cfg.baseline.logreg.C,
             "max_iter": cfg.baseline.logreg.max_iter,
             "solver": cfg.baseline.logreg.solver,
-            "multi_class": cfg.baseline.logreg.multi_class,
         },
         random_state=cfg.train.seed,
     )
