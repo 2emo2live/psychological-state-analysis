@@ -131,7 +131,7 @@ Kaggle‑датасет:
 
 ### 4.3. Ожидаемые значения
 
-Ожидаемые значения основаны на анализе решений с Kaggle и публикациях по аналогичным задачам:
+Ожидаемые значения основаны на анализе решений с Kaggle, метрик DistilBERT (https://huggingface.co/distilbert/distilbert-base-uncased) и публикациях по аналогичным задачам:
 
 - Бейзлайн (TF‑IDF + LR): **Balanced Accuracy ≈ 0.60–0.70**, **Macro F1 ≈ 0.60–0.70**.
 - Основная модель (DistilBERT): **Balanced Accuracy ≥ 0.80**, **Macro F1 ≥ 0.80**.
@@ -253,12 +253,6 @@ curl -LsSf https://astral.sh/uv/install.sh | sh
 uv sync
 ```
 
-Если не нужна группа `inference` (Triton клиент) на Mac:
-
-```bash
-uv sync --no-group inference
-```
-
 Если планируется обучать бейзлайн:
 
 ```bash
@@ -322,7 +316,7 @@ dvc push -r data-remote
 Аналогично для моделей:
 
 ```bash
-dvc add models/onnx/model.onnx
+dvc add models/best_model.onnx
 dvc push -r models-remote
 ```
 
@@ -359,8 +353,8 @@ uv run python -m psychology_state_analyzer.commands train_baseline
 Гиперпараметры TF‑IDF: `max_features=10000`, `ngram_range=(1,2)`, `min_df=2`, `max_df=0.95`.
 LogisticRegression: `C=1.0`, `solver='lbfgs'`, `max_iter=1000`.
 
-Ожидаемые метрики:
-`val_macro_f1 ≈ 0.65–0.70`, `test_macro_f1 ≈ 0.65–0.70`.
+Полученные метрики:
+`val_macro_f1 ≈ 0.73`, `test_macro_f1 ≈ 0.69`.
 
 ### 10.2. Основная модель (DistilBERT)
 
@@ -376,8 +370,8 @@ uv run python -m psychology_state_analyzer.commands train_main
 - Оптимизатор: AdamW с `lr=2e-5`, `weight_decay=0.01`.
 - Планировщик: линейный warmup (10% шагов).
 
-Ожидаемые метрики:
-`val_macro_f1 ≈ 0.82–0.85`, `test_macro_f1 ≥ 0.80`.
+Полученные метрики:
+`val_macro_f1 ≈ 0.83`, `test_macro_f1 ≈ 0.82`.
 
 ---
 
