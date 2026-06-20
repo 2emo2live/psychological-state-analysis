@@ -1,0 +1,30 @@
+name: "psychological_state_analyzer"
+platform: "onnxruntime_onnx"
+max_batch_size: 32
+
+input [
+  {
+    name: "input_ids"
+    data_type: TYPE_INT64
+    dims: [ 512 ]            # без batch
+  },
+  {
+    name: "attention_mask"
+    data_type: TYPE_INT64
+    dims: [ 512 ]
+  }
+]
+
+output [
+  {
+    name: "logits"
+    data_type: TYPE_FP32
+    dims: [ 7 ]              # количество классов
+  }
+]
+
+instance_group [
+  {
+    kind: KIND_CPU
+  }
+]
