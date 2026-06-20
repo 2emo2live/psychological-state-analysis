@@ -4,6 +4,7 @@ defaults:
   - train: default
   - logger: default
   - export: default
+  - baseline: default
   - _self_
 
 hydra:

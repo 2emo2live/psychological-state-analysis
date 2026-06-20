@@ -15,13 +15,16 @@ from psychology_state_analyzer.models.main_model import PsychologicalStateModel
 def train(cfg: DictConfig) -> None:
     pl.seed_everything(cfg.train.seed, workers=True)
 
-    load_data(
-        root_path=cfg.data.root_path,
-        dvc_path=cfg.data.dvc_path,
-        train_size=cfg.data.train_split,
-        val_size=cfg.data.val_split,
-        seed=cfg.train.seed,
-    )
+    data_dir = Path(cfg.data.root_path)
+    required_files = ["train.csv", "val.csv", "test.csv"]
+    if not all((data_dir / f).exists() for f in required_files):
+        load_data(
+            root_path=cfg.data.root_path,
+            dvc_path=cfg.data.dvc_path,
+            train_size=cfg.data.train_split,
+            val_size=cfg.data.val_split,
+            seed=cfg.train.seed,
+        )
 
     datamodule = MentalHealthDataModule(
         root_path=cfg.data.root_path,
@@ -80,8 +83,6 @@ def train(cfg: DictConfig) -> None:
     test_results = trainer.test(
         datamodule=datamodule, ckpt_path=best_model_path, verbose=True
     )
-    print("Результаты тестирования:")
-    print(test_results)
 
 
 if __name__ == "__main__":
