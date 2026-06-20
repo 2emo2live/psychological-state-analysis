@@ -3,6 +3,7 @@ defaults:
   - model: distilbert
   - train: default
   - logger: default
+  - export: default
   - _self_
 
 hydra:

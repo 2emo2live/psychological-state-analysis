@@ -1,0 +1,5 @@
+checkpoint_path: checkpoints/best.ckpt
+output_path: models/model.onnx
+opset_version: 17
+do_constant_folding: true
+verify: true
