@@ -18,7 +18,7 @@ from sklearn.metrics import (
 from psychology_state_analyzer.data_processing.baseline_preprocess import (
     preprocess_text,
 )
-from psychology_state_analyzer.models.baseline import BaselineModel
+from psychology_state_analyzer.model_class.baseline import BaselineModel
 
 
 def macro_accuracy(y_true, y_pred):
@@ -33,7 +33,7 @@ def macro_accuracy(y_true, y_pred):
 
 
 @hydra.main(version_base=None, config_path="../../configs", config_name="config")
-def main(cfg: DictConfig):
+def train(cfg: DictConfig):
     data_dir = Path(cfg.data.root_path)
     required_files = ["train.csv", "val.csv", "test.csv"]
     if not all((data_dir / f).exists() for f in required_files):
@@ -147,4 +147,4 @@ def main(cfg: DictConfig):
 
 
 if __name__ == "__main__":
-    main()
+    train()

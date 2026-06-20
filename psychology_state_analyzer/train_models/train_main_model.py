@@ -8,7 +8,7 @@ from pytorch_lightning.loggers import MLFlowLogger
 
 from psychology_state_analyzer.data_processing.datamodule import MentalHealthDataModule
 from psychology_state_analyzer.data_processing.load_data import load_data
-from psychology_state_analyzer.models.main_model import PsychologicalStateModel
+from psychology_state_analyzer.model_class.main_model import PsychologicalStateModel
 
 
 @hydra.main(config_path="../../configs", config_name="config", version_base=None)

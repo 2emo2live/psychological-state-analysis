@@ -7,7 +7,7 @@ import onnxruntime as ort
 import torch
 from omegaconf import DictConfig
 
-from psychology_state_analyzer.models.main_model import PsychologicalStateModel
+from psychology_state_analyzer.model_class.main_model import PsychologicalStateModel
 
 
 @hydra.main(config_path="../../configs", config_name="config", version_base=None)
