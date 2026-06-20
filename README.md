@@ -3,22 +3,18 @@
 ## Содержание
 
 1. [Краткое описание проекта](#1-краткое-описание-проекта)
-2. [Постановка задачи](#3-постановка-задачи)
-3. [Данные](#4-данные)
-4. [Метрики и валидация](#5-метрики-и-валидация)
-5. [Структура репозитория](#6-структура-репозитория)
-6. [Setup](#7-setup)
-7. [Конфигурации Hydra](#8-конфигурации-hydra)
-8. [DVC: данные и модельные артефакты](#9-dvc-данные-и-модельные-артефакты)
-9. [Data workflow](#10-data-workflow)
-10. [MLflow](#11-mlflow)
-11. [Train](#12-train)
-12. [Evaluation](#13-evaluation)
-13. [Model selection](#14-model-selection)
-14. [Production preparation](#15-production-preparation)
-15. [Infer](#16-infer)
-16. [Google Colab workflow](#17-google-colab-workflow)
-17. [Краткая карта основных команд](#18-краткая-карта-основных-команд)
+2. [Постановка задачи](#2-постановка-задачи)
+3. [Данные](#3-данные)
+4. [Метрики и валидация](#4-метрики-и-валидация)
+5. [Структура репозитория](#5-структура-репозитория)
+6. [Setup](#6-setup)
+7. [Конфигурации Hydra](#7-конфигурации-hydra)
+8. [DVC: данные и модельные артефакты](#8-dvc-данные-и-модельные-артефакты)
+9. [MLflow](#9-mlflow)
+10. [Train](#10-train)
+11. [Evaluation](#11-evaluation)
+12. [Production preparation](#12-production-preparation)
+13. [Infer](#13-infer)
 
 ---
 
@@ -44,9 +40,9 @@
 
 ---
 
-## 3. Постановка задачи
+## 2. Постановка задачи
 
-### 3.1. Тип задачи
+### 2.1. Тип задачи
 
 Многоклассовая классификация текстовых сообщений.
 
@@ -65,13 +61,13 @@
 - Stress: 5
 - Suicidal: 6
 
-### 3.2. Входные данные в обучении
+### 2.2. Входные данные в обучении
 
 Датасет содержит ~53 000 записей. Каждая запись содержит поле `ыtatement` (текст) и `status` (метка).
 Максимальная длина текста после токенизации для DistilBERT — **512 токенов**, в проекте используется порог обрезки`max_len = 512` (покрывает >95% сообщений).
 Для бейзлайна текст предобрабатывается (стемминг, удаление пунктуации и ссылок). Для основной модели текст не изменяется (сохраняется пунктуация и регистр, т.к. DistilBERT использует токенизатор с субсловными единицами).
 
-### 3.3. Выходные данные инференса
+### 2.3. Выходные данные инференса
 
 Система возвращает структурированный ответ:
 
@@ -88,20 +84,20 @@
 }
 ```
 
-### 3.4. Практическая мотивация
+### 2.4. Практическая мотивация
 
 Сервис может использоваться как компонент для мониторинга психологического состояния пользователей в чат‑ботах и социальных сетях, помогая своевременно выявлять тревожные сигналы и снижать риски негативного воздействия ИИ.
 
 ---
 
-## 4. Данные
+## 3. Данные
 
-### 4.1. Источник данных
+### 3.1. Источник данных
 
 Kaggle‑датасет:
 [Sentiment Analysis for Mental Health](https://www.kaggle.com/datasets/suchintikasarkar/sentiment-analysis-for-mental-health/data)
 
-### 4.2. Характеристики датасета
+### 3.2. Характеристики датасета
 
 | Свойство           | Значение         |
 | ------------------ | ---------------- |
@@ -112,7 +108,7 @@ Kaggle‑датасет:
 | Пропуски           | есть (удаляются) |
 | Целевая колонка    | `status`         |
 
-### 4.3. Распределение классов
+### 3.3. Распределение классов
 
 | Класс                | Доля |
 | -------------------- | ---- |
@@ -126,16 +122,16 @@ Kaggle‑датасет:
 
 Датасет несбалансирован (самый частый класс встречается в ~15 раз чаще самого редкого).
 
-### 4.4. Стратифицированное разделение
+### 3.4. Стратифицированное разделение
 
 Для сохранения распределения классов используется стратифицированный сплит:
 `train / val / test = 70 / 15 / 15`.
 
 ---
 
-## 5. Метрики и валидация
+## 4. Метрики и валидация
 
-### 5.1. Основные метрики
+### 4.1. Основные метрики
 
 В проекте используются следующие метрики:
 
@@ -147,11 +143,11 @@ Kaggle‑датасет:
 
 Дополнительно логируются `train_loss` и `val_loss`.
 
-### 5.2. Почему выбраны эти метрики
+### 4.2. Почему выбраны эти метрики
 
 Поскольку датасет несбалансирован, макро‑усреднённые метрики дают более объективную оценку, чем обычная accuracy. Weighted F1 помогает контролировать качество на частых классах.
 
-### 5.3. Ожидаемые значения
+### 4.3. Ожидаемые значения
 
 Ожидаемые значения основаны на анализе решений с Kaggle и публикациях по аналогичным задачам:
 
@@ -160,14 +156,14 @@ Kaggle‑датасет:
 
 Референсные значения подтверждены несколькими открытыми ноутбуками на Kaggle.
 
-### 5.4. Валидация и тестирование
+### 4.4. Валидация и тестирование
 
 Валидация используется для выбора лучшего чекпоинта (по Macro F1).
 Тестовая выборка используется только для финальной оценки (standalone‑отчёт).
 
 ---
 
-## 6. Структура репозитория
+## 5. Структура репозитория
 
 ```
 psychology_state_analyzer/
@@ -239,9 +235,9 @@ psychology_state_analyzer/
 
 ---
 
-## 7. Setup
+## 6. Setup
 
-### 7.1. Требования
+### 6.1. Требования
 
 - Python ≥3.10
 - `uv`
@@ -250,20 +246,20 @@ psychology_state_analyzer/
 - Docker (для Triton)
 - NVIDIA GPU + TensorRT (для экспорта в TensorRT)
 
-### 7.2. Клонирование
+### 6.2. Клонирование
 
 ```bash
 git clone https://github.com/yourusername/psychology_state_analyzer.git
 cd psychological_state_analysis
 ```
 
-### 7.3. Установка uv
+### 6.3. Установка uv
 
 ```bash
 curl -LsSf https://astral.sh/uv/install.sh | sh
 ```
 
-### 7.4. Установка зависимостей
+### 6.4. Установка зависимостей
 
 ```bash
 uv sync
@@ -281,7 +277,7 @@ uv sync --no-group inference
 uv sync --extra baseline
 ```
 
-### 7.5. Pre‑commit
+### 6.5. Pre‑commit
 
 ```bash
 uv run pre-commit install
@@ -290,12 +286,13 @@ uv run pre-commit run --all-files
 
 ---
 
-## 8. Конфигурации Hydra
+## 7. Конфигурации Hydra
 
 Главная точка входа — `configs/config.yaml`.
 
 Группы конфигов:
 
+```
 - `data/default.yaml` – путь к данным, `max_len`, `batch_size`
 - `baseline/default.yaml` – TF‑IDF параметры, логистическая регрессия
 - `model/distilbert.yaml` – имя модели, `num_layers_to_train`, `learning_rate`
@@ -304,21 +301,13 @@ uv run pre-commit run --all-files
 - `export/onnx.yaml` – `opset_version`, `input_names`, `output_names`
 - `export/tensorrt.yaml` – `precision`, `min_batch_size`, `opt_batch_size`, `max_batch_size`
 
-Пример переопределения:
-
-```bash
-uv run python -m psychology_state_analyzer.training.train_main \
-  model=distilbert \
-  model.learning_rate=1e-5 \
-  data.batch_size=16 \
-  trainer.max_epochs=10
 ```
 
 ---
 
-## 9. DVC: данные и модельные артефакты
+## 8. DVC: данные и модельные артефакты
 
-### 9.1. DVC remotes
+### 8.1. DVC remotes
 
 В проекте два хранилища:
 
@@ -329,13 +318,13 @@ uv run python -m psychology_state_analyzer.training.train_main \
 
 Хранилища расположены в Google Drive, поэтому для их использования необходимо настроить dvc-gdrive (см. гайд на фоциальном сайте: https://doc.dvc.org/user-guide/data-management/remote-storage/google-drive#using-a-custom-google-cloud-project-recommended)
 
-### 9.2. Получение данных
+### 8.2. Получение данных
 
 ```bash
 dvc pull -r data-remote
 ```
 
-### 9.3. Добавление данных в DVC
+### 8.3. Добавление данных в DVC
 
 ```bash
 dvc add data/raw/Combined\ Data.csv
@@ -351,9 +340,9 @@ dvc push -r models-remote
 
 ---
 
-## 11. MLflow
+## 9. MLflow
 
-### 11.1. Запуск локального сервера
+### 9.1. Запуск локального сервера
 
 ```bash
 uv run mlflow server \
@@ -362,7 +351,7 @@ uv run mlflow server \
   --default-artifact-root ./mlruns
 ```
 
-### 11.2. Что логируется
+### 9.2. Что логируется
 
 - Гиперпараметры (из Hydra)
 - train/val loss, метрики
@@ -371,9 +360,9 @@ uv run mlflow server \
 
 ---
 
-## 12. Train
+## 10. Train
 
-### 12.1. Бейзлайн
+### 10.1. Бейзлайн
 
 Обучение TF‑IDF + LogisticRegression:
 
@@ -388,7 +377,7 @@ LogisticRegression: `C=1.0`, `solver='lbfgs'`, `max_iter=1000`.
 Ожидаемые метрики:
 `val_macro_f1 ≈ 0.65–0.70`, `test_macro_f1 ≈ 0.65–0.70`.
 
-### 12.2. Основная модель (DistilBERT)
+### 10.2. Основная модель (DistilBERT)
 
 ```bash
 uv run python -m psychology_state_analyzer.commands train_main
@@ -405,14 +394,14 @@ uv run python -m psychology_state_analyzer.commands train_main
 Ожидаемые метрики:
 `val_macro_f1 ≈ 0.82–0.85`, `test_macro_f1 ≥ 0.80`.
 
-### 12.3. Ресурсы
+### 10.3. Ресурсы
 
 - Бейзлайн: CPU (любой), память ~2 ГБ.
 - DistilBERT: рекомендуется GPU с 8+ ГБ VRAM (например, NVIDIA T4). Обучение 3 эпох на T4 занимает ~20 минут.
 
 ---
 
-## 13. Evaluation
+## 11. Evaluation
 
 Standalone‑оценка на тестовой выборке:
 
@@ -428,9 +417,9 @@ Standalone‑оценка на тестовой выборке:
 }
 ```
 
-## 15. Production preparation
+## 12. Production preparation
 
-### 15.1. Экспорт в ONNX
+### 12.1. Экспорт в ONNX
 
 ```bash
 uv run python -m psychology_state_analyzer.commands export_onnx
@@ -438,7 +427,7 @@ uv run python -m psychology_state_analyzer.commands export_onnx
 
 Параметры: `opset_version=17`, динамический батч, динамическая длина последовательности.
 
-### 15.2. Экспорт в TensorRT
+### 12.2. Экспорт в TensorRT
 
 Требуется NVIDIA GPU и `trtexec`. Выполняется:
 
@@ -448,7 +437,7 @@ uv run python -m psychology_state_analyzer.commands export_tensorrt
 
 Создаётся движок `.plan`.
 
-### 15.3. Triton model repository
+### 12.3. Triton model repository
 
 Сборка репозитория:
 
@@ -493,7 +482,7 @@ instance_group [ { kind: KIND_CPU } ]
 
 ---
 
-## 16. Infer
+## 13. Infer
 
 ### 16.1. Запуск Triton сервера
 
@@ -508,7 +497,7 @@ TRITON_ENABLE_GPU=false TRITON_LOAD_MODEL=mental_health_classifier_onnx \
 curl -s localhost:8000/v2/health/ready
 ```
 
-### 16.2. Клиентский скрипт (infer.py)
+### 13.2. Клиентский скрипт (infer.py)
 
 Пример использования:
 
