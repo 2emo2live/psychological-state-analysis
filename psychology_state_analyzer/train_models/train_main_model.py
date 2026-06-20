@@ -1,3 +1,5 @@
+from pathlib import Path
+
 import hydra
 import pytorch_lightning as pl
 from omegaconf import DictConfig
@@ -73,6 +75,13 @@ def train(cfg: DictConfig) -> None:
         datamodule=datamodule,
         # ckpt_path=cfg.train.resume,
     )
+
+    best_model_path = Path(cfg.train.checkpoint_dir) / "best.ckpt"
+    test_results = trainer.test(
+        datamodule=datamodule, ckpt_path=best_model_path, verbose=True
+    )
+    print("Результаты тестирования:")
+    print(test_results)
 
 
 if __name__ == "__main__":
